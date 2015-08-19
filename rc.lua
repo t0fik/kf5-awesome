@@ -11,6 +11,8 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 
+local lain = require("lain")
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -122,7 +124,10 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 
 -- {{{ Wibox
 -- Create a textclock widget
-mytextclock = awful.widget.textclock()
+mytextclock = awful.widget.textclock("<span font='Tamsyn 5'> </span>%Y-%m-%d %H:%M ")
+
+-- Calendar
+lain.widgets.calendar:attach(mytextclock)
 
 -- Create a wibox for each screen and add it
 mywibox = {}
