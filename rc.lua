@@ -42,6 +42,7 @@ end
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init("/usr/share/awesome/themes/default/theme.lua")
 
+
 -- This is used later as the default terminal and editor to run.
 terminal = "konsole" or "xterm"
 editor = os.getenv("EDITOR") or "vi"
@@ -126,8 +127,20 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- Create a textclock widget
 mytextclock = awful.widget.textclock("<span font='Tamsyn 5'> </span>%Y-%m-%d %H:%M ")
 
--- Calendar
+-- Calendar widget
 lain.widgets.calendar:attach(mytextclock)
+
+-- Sound widget
+-- local APW = require("apw.widget")
+-- APWTimer = timer({ timeout = 0.5 })
+-- APWTimer:connect_signal("timeout", APW.Update)
+-- APWTimer:start()
+volume = lain.widgets.alsabar({ width = 55, ticks = true, ticks_size = 6, step = "2%" })
+volmargin = wibox.layout.margin(volume.bar, 2, 7)
+volmargin:set_top(6)
+volmargin:set_bottom(6)
+volumewidget = wibox.widget.background(volmargin)
+
 
 -- Create a wibox for each screen and add it
 mywibox = {}
@@ -208,6 +221,7 @@ for s = 1, screen.count() do
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
+    right_layout:add(volumewidget)
     right_layout:add(mytextclock)
     right_layout:add(mylayoutbox[s])
 
