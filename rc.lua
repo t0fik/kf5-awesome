@@ -111,7 +111,7 @@ table.insert(menu_items, { "open terminal", terminal, freedesktop.utils.lookup_i
 --                                   }
 --                         })
 
-mymainmenu = awful.menu.new({ items = menu_items, width = 300})
+mymainmenu = awful.menu.new({ items = menu_items, theme = {width = 300}})
 
 mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
