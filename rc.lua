@@ -13,8 +13,6 @@ local menubar = require("menubar")
 
 local lain = require("lain")
 
-require("lfs")
-
 
 -- {{{ Some helper funtions
 function exists(name)
