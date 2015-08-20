@@ -13,6 +13,17 @@ local menubar = require("menubar")
 
 local lain = require("lain")
 
+require("lfs")
+
+
+-- {{{ Some helper funtions
+function exists(name)
+    if type(name)~="string" then return false end
+    return os.rename(name,name) and true or false
+end
+
+-- }}}
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -38,15 +49,41 @@ do
 end
 -- }}}
 
+-- {{{ Autostart applications
+function run_once(cmd)
+  findme = cmd
+  firstspace = cmd:find(" ")
+  if firstspace then
+     findme = cmd:sub(0, firstspace-1)
+  end
+  awful.util.spawn_with_shell("pgrep -u $USER -x " .. findme .. " > /dev/null || (" .. cmd .. ")")
+end
+
+run_once("unclutter -root")
+-- }}}
+
+
+
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-beautiful.init("/usr/share/awesome/themes/default/theme.lua")
+beautiful.init(os.getenv("HOME") .. "/.config/awesome/themes/copland/theme.lua")
+-- beautiful.init("/usr/share/awesome/themes/default/theme.lua")
 
 
 -- This is used later as the default terminal and editor to run.
 terminal = "konsole" or "xterm"
-editor = os.getenv("EDITOR") or "vi"
+editor = os.getenv("EDITOR") or "vim" or "vi"
 editor_cmd = terminal .. " -e " .. editor
+
+local dirs = require('freedesktop.dirs')
+homedir = os.getenv('HOME')
+cachedir = dirs.xdg_cache_home() .. '/awesome'
+os.execute("[[ -d '" .. cachedir ..  "' ]] || mkdir " .. cachedir)
+
+-- {{{ Render username icon
+user_icon = cachedir .. '/user.png'
+os.execute("convert -background transparent -pointsize 32 -fill '".. beautiful.fg_focus .."' label:${USER} " .. user_icon)
+-- }}}
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -95,9 +132,8 @@ end
 -- applications menu
 require('freedesktop.utils')
 freedesktop.utils.terminal = terminal  -- default: "xterm"
-freedesktop.utils.icon_theme = 'breeze' -- look inside /usr/share/icons/, default: nil (don't use icon theme)
+freedesktop.utils.icon_theme = 'fedora' -- look inside /usr/share/icons/, default: nil (don't use icon theme)
 require('freedesktop.menu')
--- require("debian.menu")
 
 menu_items = freedesktop.menu.new()
 myawesomemenu = {
@@ -109,15 +145,17 @@ myawesomemenu = {
 table.insert(menu_items, { "awesome", myawesomemenu, beautiful.awesome_icon })
 table.insert(menu_items, { "open terminal", terminal, freedesktop.utils.lookup_icon({icon = 'terminal'}) })
 
--- mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
---                                     { "open terminal", terminal }
---                                   }
---                         })
-
 mymainmenu = awful.menu.new({ items = menu_items, theme = {width = 300}})
 
 mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
+
+mysesmenu = { {"Logout", "xfce4-session-logout"},
+              {"Lock", "xflock4"}
+            }
+mysesman = awful.widget.launcher({ image = user_icon,
+                                   menu = awful.menu.new( { items = mysesmenu })
+                                 })
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
@@ -131,15 +169,30 @@ mytextclock = awful.widget.textclock("<span font='Tamsyn 5'> </span>%Y-%m-%d %H:
 lain.widgets.calendar:attach(mytextclock)
 
 -- Sound widget
--- local APW = require("apw.widget")
--- APWTimer = timer({ timeout = 0.5 })
--- APWTimer:connect_signal("timeout", APW.Update)
--- APWTimer:start()
-volume = lain.widgets.alsabar({ width = 55, ticks = true, ticks_size = 6, step = "2%" })
+volicon = wibox.widget.imagebox(beautiful.vol)
+volume = lain.widgets.alsabar({width = 55, ticks = true, ticks_size = 6, step = "2%",
+settings = function()
+    if volume_now.status == "off" then
+        volicon:set_image(beautiful.vol_mute)
+    elseif volume_now.level == 0 then
+        volicon:set_image(beautiful.vol_no)
+    elseif volume_now.level <= 50 then
+        volicon:set_image(beautiful.vol_low)
+    else
+        volicon:set_image(beautiful.vol)
+    end
+end,
+colors =
+{
+    background = beautiful.bg_normal,
+    mute = red,
+    unmute = beautiful.fg_normal
+}})
 volmargin = wibox.layout.margin(volume.bar, 2, 7)
 volmargin:set_top(6)
 volmargin:set_bottom(6)
 volumewidget = wibox.widget.background(volmargin)
+volumewidget:set_bgimage(beautiful.widget_bg)
 
 
 -- Create a wibox for each screen and add it
@@ -214,6 +267,7 @@ for s = 1, screen.count() do
 
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
+    left_layout:add(mysesman)
     left_layout:add(mylauncher)
     left_layout:add(mytaglist[s])
     left_layout:add(mypromptbox[s])
