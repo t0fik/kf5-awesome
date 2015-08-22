@@ -174,7 +174,7 @@ lain.widgets.calendar:attach(mytextclock)
 
 -- Sound widget
 volicon = wibox.widget.imagebox(beautiful.vol)
-volume = lain.widgets.alsabar({width = 55, ticks = true, ticks_size = 6, step = "2%",
+volume = lain.widgets.alsabar({timeout = 1, width = 55, ticks = true, ticks_size = 6, step = "2%",
 settings = function()
     if volume_now.status == "off" then
         volicon:set_image(beautiful.vol_mute)
