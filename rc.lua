@@ -130,7 +130,7 @@ end
 -- applications menu
 require('freedesktop.utils')
 freedesktop.utils.terminal = terminal  -- default: "xterm"
-freedesktop.utils.icon_theme = 'fedora' -- look inside /usr/share/icons/, default: nil (don't use icon theme)
+freedesktop.utils.icon_theme = 'gnome' -- look inside /usr/share/icons/, default: nil (don't use icon theme)
 require('freedesktop.menu')
 
 menu_items = freedesktop.menu.new()
@@ -160,6 +160,12 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- }}}
 
 -- {{{ Wibox
+
+markup = lain.util.markup
+blue   = beautiful.fg_focus
+red    = "#EB8F8F"
+green  = "#8FEB8F"
+
 -- Create a textclock widget
 mytextclock = awful.widget.textclock("<span font='Tamsyn 5'> </span>%Y-%m-%d %H:%M ")
 
@@ -192,6 +198,10 @@ volmargin:set_bottom(6)
 volumewidget = wibox.widget.background(volmargin)
 volumewidget:set_bgimage(beautiful.widget_bg)
 
+-- Separators
+spr = wibox.widget.textbox(' ')
+small_spr = wibox.widget.textbox('<span font="Tamsyn 4"> </span>')
+bar_spr = wibox.widget.textbox('<span font="Tamsyn 3"> </span>' .. markup("#333333", "|") .. '<span font="Tamsyn 3"> </span>')
 
 -- Create a wibox for each screen and add it
 mywibox = {}
@@ -265,7 +275,9 @@ for s = 1, screen.count() do
 
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
+    left_layout:add(spr)
     left_layout:add(mysesman)
+    left_layout:add(small_spr)
     left_layout:add(mylauncher)
     left_layout:add(mytaglist[s])
     left_layout:add(mypromptbox[s])
@@ -273,6 +285,7 @@ for s = 1, screen.count() do
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
+    right_layout:add(volicon)
     right_layout:add(volumewidget)
     right_layout:add(mytextclock)
     right_layout:add(mylayoutbox[s])
