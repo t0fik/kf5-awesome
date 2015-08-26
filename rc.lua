@@ -69,7 +69,7 @@ beautiful.init(os.getenv("HOME") .. "/.config/awesome/themes/copland/theme.lua")
 
 
 -- This is used later as the default terminal and editor to run.
-terminal = "konsole" or "xterm"
+terminal = "konsole" or "xfce4-terminal" or "xterm"
 editor = os.getenv("EDITOR") or "vim" or "vi"
 editor_cmd = terminal .. " -e " .. editor
 
